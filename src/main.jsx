@@ -1,4 +1,6 @@
+import './index.css';
 import React, { useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 import {
   CheckCircle, Clock, ArrowRight, Upload, Zap, Shield, Database, Cloud, Users, TrendingUp, Play, FileText, Mic, Video,
   Edit3, Plus, Save, X, Trash2, Eye, Palette, Layout, Settings, Calendar, Target, Lightbulb
@@ -25,11 +27,17 @@ const ProjectDashboard = () => {
 
   // Global variables provided by the Canvas environment
   const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+  const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
   const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
   // Initialize Firebase and handle authentication
   useEffect(() => {
+    if (!firebaseConfig) {
+      // Demo mode - skip Firebase initialization
+      setLoading(false);
+      return;
+    }
+
     try {
       const app = initializeApp(firebaseConfig);
       const authInstance = getAuth(app);
@@ -68,6 +76,99 @@ const ProjectDashboard = () => {
 
   // Fetch projects from Firestore once auth is ready
   useEffect(() => {
+    if (!firebaseConfig) {
+      // Demo mode - use local data
+      const demoProject = {
+        id: 'demo-project',
+        name: 'ClipGenius 2025',
+        description: 'Empower anyone — even without video — to create stunning short-form content using just a spark of text or raw footage.',
+        icon: '🧠',
+        color: 'from-purple-500 to-blue-500',
+        features: [
+          { id: 1, name: 'Tailwind + Global Styling', status: 'done', files: 'index.css, tailwind.config.js, theme.css', category: 'Frontend' },
+          { id: 2, name: 'Upload from file', status: 'done', files: 'UploadForm.tsx, upload.ts, UploadAPI.ts', category: 'Core' },
+          { id: 3, name: 'Transcribe + Highlight AI Pipeline', status: 'progress', files: 'backend/cli.ts, placeholder logic done', category: 'AI/ML' },
+          { id: 4, name: 'Upload to Cloudinary', status: 'done', files: 'uploadToCloudinary.ts', category: 'Infrastructure' },
+          { id: 5, name: 'Job Status System', status: 'done', files: 'api/status/[fileId].ts', category: 'Backend' },
+          { id: 6, name: 'Video Processing Backend', status: 'progress', files: 'backend/cli.ts', category: 'Backend' },
+          { id: 7, name: 'Authentication', status: 'done', files: 'Clerk integrated, not gated yet', category: 'Auth' },
+          { id: 8, name: 'Creator Mode UI', status: 'done', files: 'pages/creator.tsx', category: 'UI/UX' },
+          { id: 9, name: 'Creator API', status: 'done', files: 'api/generate-clip-from-text.ts', category: 'API' },
+          { id: 10, name: 'Creator Flow Logic', status: 'progress', files: 'UploadAPI.ts, /processing/:fileId', category: 'Core' },
+          { id: 11, name: 'Firestore Integration', status: 'next', files: 'database/, metadata saving', category: 'Database' },
+          { id: 12, name: 'Background Worker Deployment', status: 'next', files: 'Cloud Run job runner or Docker VM', category: 'Infrastructure' },
+          { id: 13, name: 'Clip Download UI', status: 'progress', files: 'ProcessingScreen.tsx, downloadClip()', category: 'UI/UX' }
+        ],
+        uiuxTasks: [
+          { id: 1, name: 'Landing Page Design', status: 'done', description: 'Hero section, features showcase, pricing', priority: 'high' },
+          { id: 2, name: 'Upload Flow UX', status: 'done', description: 'Drag & drop, progress indicators, error states', priority: 'high' },
+          { id: 3, name: 'Creator Mode Interface', status: 'progress', description: 'Text input, style selection, preview', priority: 'high' },
+          { id: 4, name: 'Processing Status UI', status: 'progress', description: 'Real-time updates, estimated time, cancel option', priority: 'medium' },
+          { id: 5, name: 'Clip Gallery & Management', status: 'next', description: 'Grid view, search, filters, sharing options', priority: 'medium' },
+          { id: 6, name: 'Mobile Responsive Design', status: 'next', description: 'Touch-optimized, portrait video handling', priority: 'high' },
+          { id: 7, name: 'Dark/Light Theme Toggle', status: 'next', description: 'Theme persistence, smooth transitions', priority: 'low' },
+          { id: 8, name: 'Onboarding Flow', status: 'next', description: 'Tutorial tooltips, sample projects', priority: 'medium' }
+        ],
+        phases: [
+          {
+            id: 1,
+            name: 'Phase 1 - MVP + Creator Alpha',
+            timeline: 'This Week',
+            color: 'bg-green-100 border-green-300',
+            tasks: [
+              'Tailwind + Upload + Status System',
+              'Creator UI',
+              'Serverless function stubs',
+              'Wire up Firestore (auth + user uploads)',
+              'Integrate Clerk with gated routes',
+              'Implement FFmpeg + TTS placeholder backend logic'
+            ]
+          },
+          {
+            id: 2,
+            name: 'Phase 2 - Full Creator Launch',
+            timeline: 'Next Week',
+            color: 'bg-blue-100 border-blue-300',
+            tasks: [
+              'Add real voice synthesis (PlayHT, Coqui)',
+              'Add visuals (Pixabay API, animation)',
+              'Merge with FFmpeg',
+              'Queue system with real jobs',
+              'Firestore save of clips',
+              'Creator analytics, re-download, regenerate'
+            ]
+          },
+          {
+            id: 3,
+            name: 'Phase 3 - Monetization & Growth',
+            timeline: 'Mid-August',
+            color: 'bg-purple-100 border-purple-300',
+            tasks: [
+              'Freemium limits (e.g., 5 clips/month)',
+              'Stripe integration',
+              'Share to TikTok, YouTube Shorts, IG Reels',
+              'AI Templates (motivational, sales pitch, explainer)'
+            ]
+          }
+        ],
+        techStack: [
+          { id: 1, category: 'Frontend', tech: 'Vite + React 19 + Tailwind CSS + Zustand + React Router', icon: 'FileText' },
+          { id: 2, category: 'Authentication', tech: 'Clerk (frontend + serverless verification)', icon: 'Shield' },
+          { id: 3, category: 'File Uploads', tech: 'Cloudinary (via uploadToCloudinary.ts)', icon: 'Upload' },
+          { id: 4, category: 'Database', tech: 'Firestore (user clip metadata, status, auth-linked content)', icon: 'Database' },
+          { id: 5, category: 'Serverless API', tech: 'Vercel Serverless Functions', icon: 'Zap' },
+          { id: 6, category: 'Heavy Processing', tech: 'backend/cli.ts executed as Cloud Run Job OR Node.js worker on VM', icon: 'Cloud' },
+          { id: 7, category: 'Job Queue', tech: 'BullMQ (Redis), or Cloud Pub/Sub, or in-memory dev mode', icon: 'Clock' },
+          { id: 8, category: 'Storage/CDN', tech: 'Cloudinary for generated clips', icon: 'Video' }
+        ]
+      };
+      
+      setProjects([demoProject]);
+      setCurrentProjectId('demo-project');
+      setLoading(false);
+      return;
+    }
+
     if (!isAuthReady || !db || !userId) {
       return; // Wait for Firebase and auth to be ready
     }
@@ -225,6 +326,25 @@ const ProjectDashboard = () => {
   };
 
   const addNewProject = async () => {
+    if (!firebaseConfig) {
+      // Demo mode - add to local state
+      const newProjectData = {
+        id: `demo-${Date.now()}`,
+        name: 'New Project',
+        description: 'Project description',
+        icon: '🚀',
+        color: 'from-blue-500 to-purple-500',
+        features: [],
+        uiuxTasks: [],
+        phases: [],
+        techStack: []
+      };
+      setProjects([...projects, newProjectData]);
+      setCurrentProjectId(newProjectData.id);
+      setEditMode(true);
+      return;
+    }
+
     if (!db || !userId) return;
     setLoading(true);
     setError(null);
@@ -251,6 +371,15 @@ const ProjectDashboard = () => {
   };
 
   const updateProject = async (updatedProject) => {
+    if (!firebaseConfig) {
+      // Demo mode - update local state
+      const updatedProjects = projects.map(p => 
+        p.id === updatedProject.id ? updatedProject : p
+      );
+      setProjects(updatedProjects);
+      return;
+    }
+
     if (!db || !userId || !updatedProject.id) return;
     setLoading(true);
     setError(null);
@@ -266,6 +395,17 @@ const ProjectDashboard = () => {
   };
 
   const deleteProject = async (projectId) => {
+    if (!firebaseConfig) {
+      // Demo mode - update local state
+      if (projects.length <= 1) return; // Prevent deleting the last project
+      const updatedProjects = projects.filter(p => p.id !== projectId);
+      setProjects(updatedProjects);
+      if (currentProjectId === projectId) {
+        setCurrentProjectId(updatedProjects[0]?.id || null);
+      }
+      return;
+    }
+
     if (!db || !userId || projects.length <= 1) return; // Prevent deleting the last project
     setLoading(true);
     setError(null);
@@ -1018,3 +1158,8 @@ const ProjectDashboard = () => {
 };
 
 export default ProjectDashboard;
+
+// Mount the React app
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<ProjectDashboard />);
